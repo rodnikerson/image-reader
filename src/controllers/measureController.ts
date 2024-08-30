@@ -1,7 +1,5 @@
 import { Request, Response } from 'express'
-import { FileService } from '../services/fileService'
-import { GeminiService } from '../services/geminiService'
-import { MeasureService } from '../services/measureService'
+import { FileService, GeminiService, MeasureService } from '../services'
 
 const measureService = new MeasureService()
 const geminiService = new GeminiService()
