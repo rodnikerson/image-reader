@@ -95,4 +95,48 @@ export class MeasureController {
       res.status(500).json({ error: 'Erro ao atualizar a leitura.' })
     }
   }
+
+  async getMeasures(req: Request, res: Response): Promise<void> {
+    try {
+      const customer_code = req.params.customer_code
+      const measure_type = req.query.measure_type as string | undefined
+
+      if (
+        measure_type &&
+        !['WATER', 'GAS'].includes(measure_type.toUpperCase())
+      ) {
+        res.status(400).json({
+          error_code: 'INVALID_TYPE',
+          error_description: 'Tipo de medição não permitida',
+        })
+        return
+      }
+
+      const measures = await measureService.getMeasuresByCustomerCode(
+        customer_code,
+        measure_type?.toUpperCase()
+      )
+
+      if (measures.length === 0) {
+        res.status(404).json({
+          error_code: 'MEASURES_NOT_FOUND',
+          error_description: 'Nenhuma leitura encontrada',
+        })
+        return
+      }
+
+      res.status(200).json({
+        customer_code,
+        measures: measures.map((measure) => ({
+          measure_uuid: measure.id,
+          measure_datetime: measure.measure_datetime,
+          measure_type: measure.measure_type,
+          has_confirmed: measure.has_confirmed,
+          image_url: measure.image_url,
+        })),
+      })
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch measures' })
+    }
+  }
 }
