@@ -1,10 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express'
-import { GoogleAIFileManager } from '@google/generative-ai/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import dotenv from 'dotenv'
+import { fileManager, model } from './config/geminiClient'
 import fs from 'fs'
-
-dotenv.config()
 
 const app = express()
 
@@ -12,13 +8,6 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 async function callGemini() {
-  const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY!)
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
-  })
-
   try {
     const uploadResponse = await fileManager.uploadFile(
       './public/images/jetpack.jpg',
