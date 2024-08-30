@@ -10,15 +10,6 @@ export class MeasureController {
     try {
       const { image, customer_code, measure_datetime, measure_type } = req.body
 
-      if (!image || !customer_code || !measure_datetime || !measure_type) {
-        res.status(400).json({
-          error_code: 'INVALID_DATA',
-          error_description:
-            'Todos os campos são obrigatórios: image, customer_code, measure_datetime, measure_type',
-        })
-        return
-      }
-
       const isDuplicate = await measureService.checkDuplicateMeasure(
         customer_code,
         measure_datetime,
