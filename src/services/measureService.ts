@@ -39,4 +39,18 @@ export class MeasureService {
 
     return !!duplicateMeasure
   }
+
+  async getMeasureById(measure_uuid: string): Promise<any | null> {
+    return await db('measures').where({ id: measure_uuid }).first()
+  }
+
+  async updateMeasureValue(
+    measure_uuid: string,
+    confirmed_value: number
+  ): Promise<void> {
+    await db('measures').where({ id: measure_uuid }).update({
+      measure_value: confirmed_value,
+      has_confirmed: true,
+    })
+  }
 }

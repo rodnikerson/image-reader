@@ -66,4 +66,45 @@ export class MeasureController {
       res.status(500).json({ error })
     }
   }
+
+  async updateMeasure(req: Request, res: Response): Promise<void> {
+    try {
+      const { measure_uuid, confirmed_value } = req.body
+
+      if (
+        typeof measure_uuid !== 'string' ||
+        typeof confirmed_value !== 'number'
+      ) {
+        res.status(400).json({
+          error_code: 'INVALID_DATA',
+          error_description:
+            'Os parâmetros "measure_uuid" devem ser uma string e "confirmed_value" deve ser um número.',
+        })
+        return
+      }
+
+      const measure = await measureService.getMeasureById(measure_uuid)
+      if (!measure) {
+        res.status(404).json({
+          error_code: 'MEASURE_NOT_FOUND',
+          error_description: 'Leitura não encontrada.',
+        })
+        return
+      }
+
+      if (measure.has_confirmed) {
+        res.status(409).json({
+          error_code: 'CONFIRMATION_DUPLICATE',
+          error_description: 'Leitura do mês já realizada.',
+        })
+        return
+      }
+
+      await measureService.updateMeasureValue(measure_uuid, confirmed_value)
+
+      res.status(200).json({ success: true })
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao atualizar a leitura.' })
+    }
+  }
 }
