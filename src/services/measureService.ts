@@ -1,21 +1,30 @@
 import { v4 as uuidv4 } from 'uuid'
-import db from '../database'
+import { MeasureModel, Measure } from '../models/Measure'
 
 export class MeasureService {
-  async createMeasure(measure: any): Promise<{ id: string }[]> {
+  private measureModel: MeasureModel
+
+  constructor() {
+    this.measureModel = new MeasureModel()
+  }
+
+  async createMeasure(measure: Measure): Promise<{ id: string }[]> {
     measure.id = uuidv4()
-    return await db('measures').insert(measure).returning('id')
+    return await this.measureModel.create(measure)
   }
 
   async getMeasuresByCustomerCode(
     customer_code: string,
     measure_type?: string
-  ): Promise<any[]> {
-    const query = db('measures').where('customer_code', customer_code)
+  ): Promise<Measure[]> {
     if (measure_type) {
-      query.andWhere('measure_type', measure_type)
+      return await this.measureModel.findByCustomerCodeAndType(
+        customer_code,
+        measure_type
+      )
+    } else {
+      return await this.measureModel.findByCustomerCode(customer_code)
     }
-    return await query.select()
   }
 
   async checkDuplicateMeasure(
@@ -40,17 +49,14 @@ export class MeasureService {
     return !!duplicateMeasure
   }
 
-  async getMeasureById(measure_uuid: string): Promise<any | null> {
-    return await db('measures').where({ id: measure_uuid }).first()
+  async getMeasureById(measure_uuid: string): Promise<Measure | null> {
+    return await this.measureModel.findById(measure_uuid)
   }
 
   async updateMeasureValue(
     measure_uuid: string,
     confirmed_value: number
   ): Promise<void> {
-    await db('measures').where({ id: measure_uuid }).update({
-      measure_value: confirmed_value,
-      has_confirmed: true,
-    })
+    await this.measureModel.updateValue(measure_uuid, confirmed_value)
   }
 }
